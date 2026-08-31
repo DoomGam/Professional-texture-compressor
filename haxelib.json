@@ -1,0 +1,11 @@
+{
+  "name": "Proffisional-texture-compressor",
+  "url": "https://github.com/YOUR_USERNAME/Compressor-Texture-Profissioner",
+  "license": "MIT",
+  "tags": ["fnf", "flixel", "openfl", "texture", "compression", "ios", "mobile"],
+  "description": "High-performance texture compression format (.ctp) optimized for FNF Mobile/iOS.",
+  "version": "1.0.0",
+  "classPath": "source",
+  "releasenote": "Initial v1.0.0 setup",
+  "contributors": ["Doom"]
+}
