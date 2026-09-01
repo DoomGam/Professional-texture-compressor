@@ -2,6 +2,12 @@
 <project>
   <classpath name="source" />
 
+  <target name="before:build" if="android || ios">
+    
+    <command name="python3" args="encoder/ctp_builder.py assets" if="mac || linux" />
+    
+    <command name="python" args="encoder/ctp_builder.py assets" if="windows" />
+    
   <target id="haxe">
     <cmd execute="python3 ${this:path}/encoder/ctp_builder.py" if="mobile && !windows" />
     <cmd execute="python ${this:path}/encoder/ctp_builder.py" if="mobile && windows" />
