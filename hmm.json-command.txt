@@ -3,7 +3,7 @@
     {
       "name": "Professional-texture-compressor",
       "type": "git",
-      "url": "https://github.com/SEU_USUARIO/Compressor-Texture-Profissioner",
+      "url": "https://github.com/DoomGam/Professional-texture-compressor/tree/main",
       "dir": "source"
     }
   ]
