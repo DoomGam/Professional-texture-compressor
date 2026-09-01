@@ -1,0 +1,10 @@
+{
+  "dependencies": [
+    {
+      "name": "Professional-texture-compressor",
+      "type": "git",
+      "url": "https://github.com/SEU_USUARIO/Compressor-Texture-Profissioner",
+      "dir": "source"
+    }
+  ]
+}
