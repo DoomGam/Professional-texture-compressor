@@ -4,58 +4,54 @@ import haxe.io.Bytes;
 import openfl.display.BitmapData;
 import openfl.utils.ByteArray;
 
-/**
- * Core Decoder for CTP (.ctp) texture format.
- * Reads binary payload, validates header, and reconstructs texture buffers.
- */
-class CTPDecoder {
-    public static const MAGIC_HEADER:String = "CTP1";
+class CTPDecoder 
+{
+    private static inline var MAGIC_HEADER:String = "CTP2";
+    private static inline var HEADER_SIZE:Int = 20;
 
     /**
-     * Decodes binary CTP bytes into OpenFL BitmapData.
-     * @param bytes Raw binary bytes from .ctp file.
-     * @return BitmapData ready for Flixel rendering.
+     * Decodifica um arquivo binário .ctp (Header v2) diretamente para BitmapData
      */
-    public static function decode(bytes:Bytes):BitmapData {
-        if (bytes == null || bytes.length < 16) {
-            trace("[CTPDecoder] Error: Invalid or corrupt CTP byte stream.");
+    public static function decode(bytes:Bytes):BitmapData 
+    {
+        if (bytes == null || bytes.length < HEADER_SIZE) 
+        {
+            trace("[CTPDecoder] Erro: Dados binários inválidos ou corrompidos.");
             return null;
         }
 
-        var input = new haxe.io.BytesInput(bytes);
-        
-        // 1. Read Header (16 Bytes)
-        var magic = input.readString(4);
-        if (magic != MAGIC_HEADER) {
-            trace('[CTPDecoder] Error: Invalid Magic Header "${magic}". Expected "${MAGIC_HEADER}".');
+        var magic:String = bytes.getString(0, 4);
+        if (magic != MAGIC_HEADER) 
+        {
+            trace("[CTPDecoder] Erro: Assinatura de cabeçalho incompatível. Esperado CTP2, recebido: " + magic);
             return null;
         }
 
-        var width:Int = input.readInt32();
-        var height:Int = input.readInt32();
-        var blockSize:Int = input.readInt32();
+        var width:Int = bytes.getInt32(4);
+        var height:Int = bytes.getInt32(8);
+        var blockSize:Int = bytes.getInt32(12);
+        var compressionMode:Int = bytes.get(16);
 
-        trace('[CTPDecoder] Loading CTP Texture (${width}x${height}) with Block Size ${blockSize}x${blockSize}');
+        var compressedPayload:Bytes = bytes.sub(HEADER_SIZE, bytes.length - HEADER_SIZE);
 
-        // 2. Read Payload & Reconstruct Buffer
-        var compressedPayloadSize = bytes.length - 16;
-        var compressedBytes = input.read(compressedPayloadSize);
-        
-        // Decompress stream (LZ4/ZSTD wrapper)
         var decompressedBytes:Bytes;
-        try {
-            decompressedBytes = haxe.zip.Uncompress.run(compressedBytes);
-        } catch (e:Dynamic) {
-            trace("[CTPDecoder] Compression fallback triggered or raw raw stream read.");
-            decompressedBytes = compressedBytes;
+        try 
+        {
+            decompressedBytes = format.tools.Deflate.decompress(compressedPayload);
+        } 
+        catch (e:Dynamic) 
+        {
+            var byteArray:ByteArray = ByteArray.fromBytes(compressedPayload);
+            byteArray.uncompress();
+            decompressedBytes = byteArray.toBytes();
         }
 
-        // 3. Create OpenFL BitmapData Container
-        var bitmap = new BitmapData(width, height, true, 0x00000000);
-        var byteArray:ByteArray = ByteArray.fromBytes(decompressedBytes);
-        byteArray.position = 0;
+        var bitmap:BitmapData = new BitmapData(width, height, true, 0x00000000);
+        var pixelData:ByteArray = ByteArray.fromBytes(decompressedBytes);
+        pixelData.position = 0;
         
-        bitmap.setPixels(bitmap.rect, byteArray);
+        bitmap.setPixels(bitmap.rect, pixelData);
+
         return bitmap;
     }
 }
