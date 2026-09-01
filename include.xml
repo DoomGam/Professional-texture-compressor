@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+  <classpath name="source" />
+
+  <target id="haxe">
+
+    <cmd execute="python3 ${this:path}/encoder/ctp_builder.py" if="mobile" />
+  </target>
+</project>
