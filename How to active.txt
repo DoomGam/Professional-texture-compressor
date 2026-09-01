@@ -19,17 +19,41 @@ public static function image(key:String, ?library:String):FlxGraphic
         var ctpGraphic:FlxGraphic = CTPGraphic.fromFile(ctpPath);
         if (ctpGraphic != null) return ctpGraphic;
     }
+import ctp.CTPGraphic;
 
-    // 2. Fallback: Carrega o PNG original caso o arquivo .ctp não exista
+public static function image(key:String, ?library:String):FlxGraphic 
+{
+    var ctpPath:String = getPath('images/' + key + '.ctp', IMAGE, library);
+    
+    // 1. Tenta carregar o CTP2
+    if (Assets.exists(ctpPath)) 
+    {
+        try 
+        {
+            var ctpGraphic:FlxGraphic = CTPGraphic.fromFile(ctpPath);
+            if (ctpGraphic != null && ctpGraphic.bitmap != null) 
+            {
+                return ctpGraphic;
+            }
+        } 
+        catch (e:Dynamic) 
+        {
+            trace('[Paths Error] Erro ao decodificar CTP: ' + key + ' | Revertendo para PNG. Erro: ' + e);
+        }
+    }
+
+
+    // 2. Fallback Seguro para PNG
     var pngPath:String = getPath('images/' + key + '.png', IMAGE, library);
     if (Assets.exists(pngPath)) 
     {
         return FlxG.bitmap.add(pngPath, false, pngPath);
     }
 
-    trace('[Paths] AVISO: Imagem não encontrada para key: ' + key);
+    trace('[Paths Warning] Nenhum asset encontrado para: ' + key);
     return null;
 }
+
 
 No arquivo source/PlayState.hx (ou MusicBeatState.hx), adicione a chamada de purga de VRAM dentro do método destroy() para evitar estouro de memória no Android/iOS ao trocar de música:
 override public function destroy():Void 
