@@ -3,7 +3,7 @@
   <classpath name="source" />
 
   <target id="haxe">
-
-    <cmd execute="python3 ${this:path}/encoder/ctp_builder.py" if="mobile" />
+    <cmd execute="python3 ${this:path}/encoder/ctp_builder.py" if="mobile && !windows" />
+    <cmd execute="python ${this:path}/encoder/ctp_builder.py" if="mobile && windows" />
   </target>
 </project>
