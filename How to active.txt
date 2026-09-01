@@ -1,0 +1,41 @@
+como por no project.xml
+<!-- Suporte ao Compressor Texture Profissioner (.ctp) -->
+<haxelib name="compressor-texture-profissioner" />
+
+no source/Paths.hx
+coloque isso:import ctp.CTPGraphic;
+
+e tbm Substitua a sua função image() pelo bloco abaixo:
+/**
+ * Carrega gráficos priorizando o formato .ctp otimizado para mobile.
+ * Caso o arquivo .ctp não exista na pasta, faz o fallback para o .png tradicional.
+ */
+public static function image(key:String, ?library:String):FlxGraphic 
+{
+    // 1. Tenta carregar a textura binária otimizada em .ctp
+    var ctpPath:String = getPath('images/' + key + '.ctp', IMAGE, library);
+    if (Assets.exists(ctpPath)) 
+    {
+        var ctpGraphic:FlxGraphic = CTPGraphic.fromFile(ctpPath);
+        if (ctpGraphic != null) return ctpGraphic;
+    }
+
+    // 2. Fallback: Carrega o PNG original caso o arquivo .ctp não exista
+    var pngPath:String = getPath('images/' + key + '.png', IMAGE, library);
+    if (Assets.exists(pngPath)) 
+    {
+        return FlxG.bitmap.add(pngPath, false, pngPath);
+    }
+
+    trace('[Paths] AVISO: Imagem não encontrada para key: ' + key);
+    return null;
+}
+
+No arquivo source/PlayState.hx (ou MusicBeatState.hx), adicione a chamada de purga de VRAM dentro do método destroy() para evitar estouro de memória no Android/iOS ao trocar de música:
+override public function destroy():Void 
+{
+    // Limpa o cache de texturas CTP da memória da GPU ao fechar a fase
+    ctp.CTPGraphic.clearCache();
+
+    super.destroy();
+}
